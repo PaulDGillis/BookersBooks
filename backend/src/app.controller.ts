@@ -14,6 +14,8 @@ import { AuthService } from './auth/auth.service';
 import { LocalAuthGuard } from './auth/local-auth.guard';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { UsersService } from './users/users.service';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { User } from '@prisma/client';
 
 @Controller()
 export class AppController {
@@ -32,13 +34,29 @@ export class AppController {
   async signupUser(
     @Body() userData: { username: string; password: string },
   ): Promise<any> {
-    return this.authService.signup(userData.username, userData.password);
+    return this.authService
+      .signup(userData.username, userData.password)
+      .catch((error: PrismaClientKnownRequestError) => {
+        if (error.code === 'P2002') {
+          throw new HttpException(
+            'Username Taken',
+            HttpStatus.EXPECTATION_FAILED,
+          );
+        }
+      });
   }
 
   @UseGuards(LocalAuthGuard)
   @Post('auth/login')
   async loginUser(@Request() req) {
     return this.authService.login(req.user);
+  }
+
+  @Post('auth/checkUsername')
+  async checkUsername(@Body() body: { username: string }) {
+    return this.userService.find(body.username).then((user: User) => {
+      return { valid: user === null };
+    });
   }
 
   @UseGuards(JwtAuthGuard)
