@@ -1,12 +1,13 @@
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import * as userApi from "../api/users";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function SignIn(props: { 
-    onRegister: () => void,
-    onSuccess: () => void,
-}) {
+function LogIn() {
     const [error, setError] = useState("");
     const [inputs, setInputs] = useState({ username: "", password: "" });
+    const navigate = useNavigate();
+    const navToMain = () => navigate('/');
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleChange = (event: { target: { name: any; value: any; }; }) => {
@@ -18,22 +19,9 @@ function SignIn(props: {
     const handleSubmit = (event: { preventDefault: () => void; }) => {
         event.preventDefault();
         console.log(inputs);
-        fetch('http://localhost:3000/auth/login', {
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(inputs),
-        }).then(async function (response: Response) {
-          const res = await response.json();
-          console.log(response);
-          console.log(res);
-          if (response.ok) {
-            props.onSuccess();
-          } else {
-            setError('Username/Password not found.');
-          }
-        });
+        userApi.login(inputs)
+          .then(() => navToMain())
+          .catch(error => setError(error.message));
     }
 
     return (
@@ -108,7 +96,7 @@ function SignIn(props: {
           </form>
           <p className="mt-10 text-center text-sm text-gray-500">
             Not a member? 
-            <a onClick={props.onRegister} className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"> Register</a>
+            <Link to='/register' className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"> Register</Link>
           </p>
         </div>
       </div>
@@ -116,4 +104,4 @@ function SignIn(props: {
     )
 }
 
-export default SignIn
+export default LogIn

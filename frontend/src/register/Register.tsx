@@ -1,31 +1,22 @@
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import * as userApi from "../api/users";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function Register(props: { 
-    onSignin: () => void,
-    onSuccess: () => void,
-}) {
+function Register() {
     const [error, setError] = useState("");
     const [inputs, setInputs] = useState({ username: "", password: "" });
+
+    const navigate = useNavigate();
+    const navToMain = () => navigate('/');
 
     useEffect(() => {
       const checkUsername = setTimeout(() => {
         const { username } = inputs;
 
-        fetch('http://localhost:3000/auth/checkUsername', {
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ username }),
-        }).then(async function (response: Response) {
-          const res = await response.json();
-          if (response.ok && res['valid'] === false) {
-            setError("Username Taken.")
-          } else {
-            setError("")
-          }
-        })
+        userApi.checkUsername(username)
+          .then(() => setError(""))
+          .catch(error => setError(error.message));
       }, 1000)
 
       return () => clearTimeout(checkUsername)
@@ -41,20 +32,10 @@ function Register(props: {
     const handleSubmit = (event: { preventDefault: () => void; }) => {
         event.preventDefault();
         console.log(inputs);
-        fetch('http://localhost:3000/auth/signup', {
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(inputs),
-        }).then(async function (response: Response) {
-          const res = await response.json();
-          if (response.ok) {
-            props.onSuccess();
-          } else if (res['statusCode'] === 417 && res['message'] === 'Username Taken') {
-            setError("Username Taken.")
-          }
-        });
+
+        userApi.register(inputs)
+          .then(() => { navToMain() })
+          .catch(error => setError(error.message));
     }
 
     return (
@@ -129,7 +110,7 @@ function Register(props: {
           </form>
           <p className="mt-10 text-center text-sm text-gray-500">
             Already a member? 
-            <a onClick={props.onSignin} className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"> SignIn</a>
+            <Link to="/login" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"> SignIn</Link>
           </p>
         </div>
       </div>

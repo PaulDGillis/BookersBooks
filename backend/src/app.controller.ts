@@ -8,7 +8,9 @@ import {
   Delete,
   HttpException,
   HttpStatus,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { AppService } from './app.service';
 import { AuthService } from './auth/auth.service';
 import { LocalAuthGuard } from './auth/local-auth.guard';
@@ -48,8 +50,16 @@ export class AppController {
 
   @UseGuards(LocalAuthGuard)
   @Post('auth/login')
-  async loginUser(@Request() req) {
-    return this.authService.login(req.user);
+  async loginUser(@Request() req, @Res({ passthrough: true }) res: Response) {
+    const { access_token } = await this.authService.login(req.user);
+    res
+      .cookie('access_token', access_token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        expires: new Date(Date.now() + 1 * 24 * 60 * 10000),
+      })
+      .send({ status: 'ok' });
   }
 
   @Post('auth/checkUsername')
