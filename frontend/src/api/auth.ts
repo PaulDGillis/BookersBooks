@@ -21,8 +21,8 @@ export async function register(params: {
     }));
 }
 
-export async function checkCurrentUser() {
-    return fetch(BASE_URL + '/auth/checkUser', {
+export async function authStatus() {
+    return fetch(BASE_URL + '/auth/status', {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -31,7 +31,7 @@ export async function checkCurrentUser() {
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error('Username/Password not found.');
+            throw new Error('User not found.');
         }
     });
 }
@@ -74,6 +74,23 @@ export async function login(params: {
             return response.json();
         } else {
             throw new Error('Username/Password not found.');
+        }
+    });
+}
+
+export async function logout() {
+    return fetch(BASE_URL + '/auth/logout', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            "Content-Type": "application/json",
+        },
+    })
+    .then(response => {
+        if (response.ok) {
+            return; // TODO
+        } else {
+            throw new Error('');
         }
     });
 }

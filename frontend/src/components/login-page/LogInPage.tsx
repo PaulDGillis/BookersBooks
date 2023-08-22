@@ -1,26 +1,12 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import * as userApi from "../api/users";
+import { Link } from "react-router-dom";
+import { useState } from "react";
+import useAuth from "../../hooks/useAuth";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function Register() {
+function LogInPage() {
+    const { login } = useAuth();
     const [error, setError] = useState("");
     const [inputs, setInputs] = useState({ username: "", password: "" });
-
-    const navigate = useNavigate();
-    const navToMain = () => navigate('/');
-
-    useEffect(() => {
-      const checkUsername = setTimeout(() => {
-        const { username } = inputs;
-
-        userApi.checkUsername(username)
-          .then(() => setError(""))
-          .catch(error => setError(error.message));
-      }, 1000)
-
-      return () => clearTimeout(checkUsername)
-    });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleChange = (event: { target: { name: any; value: any; }; }) => {
@@ -31,11 +17,8 @@ function Register() {
 
     const handleSubmit = (event: { preventDefault: () => void; }) => {
         event.preventDefault();
-        console.log(inputs);
-
-        userApi.register(inputs)
-          .then(() => { navToMain() })
-          .catch(error => setError(error.message));
+        login(inputs)
+          .catch((error) => setError(error.message));
     }
 
     return (
@@ -48,7 +31,7 @@ function Register() {
             alt="Your Company"
           />
           <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-            Register your account
+            Sign in to your account
           </h2>
         </div>
 
@@ -104,13 +87,13 @@ function Register() {
                 type="submit"
                 className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
-                Register
+                Sign in
               </button>
             </div>
           </form>
           <p className="mt-10 text-center text-sm text-gray-500">
-            Already a member? 
-            <Link to="/login" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"> SignIn</Link>
+            Not a member? 
+            <Link to='/register' className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"> Register</Link>
           </p>
         </div>
       </div>
@@ -118,4 +101,4 @@ function Register() {
     )
 }
 
-export default Register
+export default LogInPage

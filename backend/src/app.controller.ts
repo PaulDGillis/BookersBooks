@@ -8,10 +8,9 @@ import {
   Delete,
   HttpException,
   HttpStatus,
-  Res,
+  Res
 } from '@nestjs/common';
 import { Response } from 'express';
-import { AppService } from './app.service';
 import { AuthService } from './auth/auth.service';
 import { LocalAuthGuard } from './auth/local-auth.guard';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
@@ -22,15 +21,9 @@ import { User } from '@prisma/client';
 @Controller()
 export class AppController {
   constructor(
-    private readonly appService: AppService,
     private readonly authService: AuthService,
     private readonly userService: UsersService,
   ) {}
-
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
-  }
 
   @Post('auth/signup')
   async signupUser(
@@ -62,6 +55,13 @@ export class AppController {
       .send({ status: 'ok' });
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('auth/logout')
+  async logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('access_token')
+       .send({ status: 'ok' });
+  }
+
   @Post('auth/checkUsername')
   async checkUsername(@Body() body: { username: string }) {
     return this.userService.find(body.username).then((user: User) => {
@@ -85,8 +85,8 @@ export class AppController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('profile')
+  @Get('auth/status')
   getProfile(@Request() req) {
-    return req.user;
+    return { 'status': 'ok' };
   }
 }
