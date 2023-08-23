@@ -8,7 +8,7 @@ import {
   Delete,
   HttpException,
   HttpStatus,
-  Res
+  Res,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth/auth.service';
@@ -58,8 +58,7 @@ export class AppController {
   @UseGuards(JwtAuthGuard)
   @Get('auth/logout')
   async logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('access_token')
-       .send({ status: 'ok' });
+    res.clearCookie('access_token').send({ status: 'ok' });
   }
 
   @Post('auth/checkUsername')
@@ -86,7 +85,7 @@ export class AppController {
 
   @UseGuards(JwtAuthGuard)
   @Get('auth/status')
-  getProfile(@Request() req) {
-    return { 'status': 'ok' };
+  getProfile() {
+    return { status: 'ok' };
   }
 }
