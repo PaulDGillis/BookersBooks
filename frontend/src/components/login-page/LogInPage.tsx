@@ -4,26 +4,25 @@ import useAuth from "../../hooks/useAuth";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function LogInPage() {
-    const { login } = useAuth();
-    const [error, setError] = useState("");
-    const [inputs, setInputs] = useState({ username: "", password: "" });
+  const { login } = useAuth();
+  const [error, setError] = useState("");
+  const [inputs, setInputs] = useState({ username: "", password: "" });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handleChange = (event: { target: { name: any; value: any; }; }) => {
-        const name = event.target.name;
-        const value = event.target.value;
-        setInputs(values => ({...values, [name]: value}))
-    }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleChange = (event: { target: { name: any; value: any } }) => {
+    const name = event.target.name;
+    const value = event.target.value;
+    setInputs((values) => ({ ...values, [name]: value }));
+  };
 
-    const handleSubmit = (event: { preventDefault: () => void; }) => {
-        event.preventDefault();
-        login(inputs)
-          .catch((error) => setError(error.message));
-    }
+  const handleSubmit = (event: { preventDefault: () => void }) => {
+    event.preventDefault();
+    login(inputs).catch((error) => setError(error.message));
+  };
 
-    return (
-        <>
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+  return (
+    <>
+      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <img
             className="mx-auto h-10 w-auto"
@@ -39,14 +38,20 @@ function LogInPage() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <div className="flex items-center justify-between">
-                <label htmlFor="username" className="block text-sm font-medium leading-6 text-gray-900">
+                <label
+                  htmlFor="username"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
                   Username
                 </label>
-                {error !== '' &&
-                <div className="relative leading-normal text-red-700" role="alert">
-                  {error}
-                </div>
-                }
+                {error !== "" && (
+                  <div
+                    className="relative leading-normal text-red-700"
+                    role="alert"
+                  >
+                    {error}
+                  </div>
+                )}
               </div>
               <div className="mt-2">
                 <input
@@ -54,7 +59,7 @@ function LogInPage() {
                   name="username"
                   type="text"
                   autoComplete="username"
-                  value={inputs.username || ""} 
+                  value={inputs.username || ""}
                   onChange={handleChange}
                   required
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -64,7 +69,10 @@ function LogInPage() {
 
             <div>
               <div className="flex items-center justify-between">
-                <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
                   Password
                 </label>
               </div>
@@ -74,7 +82,7 @@ function LogInPage() {
                   name="password"
                   type="password"
                   autoComplete="current-password"
-                  value={inputs.password || ""} 
+                  value={inputs.password || ""}
                   onChange={handleChange}
                   required
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -92,13 +100,19 @@ function LogInPage() {
             </div>
           </form>
           <p className="mt-10 text-center text-sm text-gray-500">
-            Not a member? 
-            <Link to='/register' className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"> Register</Link>
+            Not a member?
+            <Link
+              to="/register"
+              className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
+            >
+              {" "}
+              Register
+            </Link>
           </p>
         </div>
       </div>
     </>
-    )
+  );
 }
 
-export default LogInPage
+export default LogInPage;

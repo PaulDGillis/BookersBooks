@@ -1,47 +1,92 @@
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
-import { useState } from 'react';
-import { Link } from 'react-router-dom'
+import { useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Collapse, Dropdown, initTE } from "tw-elements";
 
-const navigation = [
-  { name: 'Dashboard', href: '/', current: true },
-  { name: 'Settings', href: '/settings', current: false },
-  { name: 'Upload', href: '/upload', current: false },
-]
+export default function Navbar(props: { logout: () => void }) {
+  useEffect(() => {
+    initTE({ Collapse, Dropdown });
+  }, []);
 
-export default function Navbar() {
-    const [open, setOpen] = useState(false);
+  const location = useLocation();
+  let icon;
+  let toLoc;
+  switch (location.pathname) {
+    case "/upload":
+    case "/book":
+      icon = (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          className="w-6 h-6"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      );
+      toLoc = "/library";
+      break;
+    case "/library":
+    default:
+      icon = (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          className="w-6 h-6"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 4.5v15m7.5-7.5h-15"
+          />
+        </svg>
+      );
+      toLoc = "/upload";
+      break;
+  }
 
   return (
-    <nav className="flex items-center justify-between flex-wrap bg-teal-500 p-6">
-        <div className="flex items-center flex-shrink-0 text-white mr-6">
-            <svg className="fill-current h-8 w-8 mr-2" width="54" height="54" viewBox="0 0 54 54" xmlns="http://www.w3.org/2000/svg"><path d="M13.5 22.1c1.8-7.2 6.3-10.8 13.5-10.8 10.8 0 12.15 8.1 17.55 9.45 3.6.9 6.75-.45 9.45-4.05-1.8 7.2-6.3 10.8-13.5 10.8-10.8 0-12.15-8.1-17.55-9.45-3.6-.9-6.75.45-9.45 4.05zM0 38.3c1.8-7.2 6.3-10.8 13.5-10.8 10.8 0 12.15 8.1 17.55 9.45 3.6.9 6.75-.45 9.45-4.05-1.8 7.2-6.3 10.8-13.5 10.8-10.8 0-12.15-8.1-17.55-9.45-3.6-.9-6.75.45-9.45 4.05z"/></svg>
-            <span className="font-semibold text-xl tracking-tight">Tailwind CSS</span>
+    <>
+      <nav
+        className="py-4 px-3 justify-between flex-no-wrap relative flex w-full bg-[#FBFBFB] py-2 shadow-md shadow-black/5 dark:bg-neutral-600 dark:shadow-black/10"
+        data-te-navbar-ref
+      >
+        <Link
+          to={toLoc}
+          className="text-neutral-600 transition duration-200 hover:text-neutral-700 hover:ease-in-out focus:text-neutral-700 disabled:text-black/30 motion-reduce:transition-none dark:text-neutral-200 dark:hover:text-neutral-300 dark:focus:text-neutral-300 [&.active]:text-black/90 dark:[&.active]:text-neutral-400"
+        >
+          <span className="[&>svg]:w-5">{icon}</span>
+        </Link>
+        <div
+          className="text-neutral-600 transition duration-200 hover:text-neutral-700 hover:ease-in-out focus:text-neutral-700 disabled:text-black/30 motion-reduce:transition-none dark:text-neutral-200 dark:hover:text-neutral-300 dark:focus:text-neutral-300 [&.active]:text-black/90 dark:[&.active]:text-neutral-400"
+          onClick={props.logout}
+        >
+          <span className="[&>svg]:w-5">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-6 h-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
+              />
+            </svg>
+          </span>
         </div>
-        <div className="block lg:hidden">
-            <button className="flex items-center px-3 py-2 border rounded text-teal-200 border-teal-400 hover:text-white hover:border-white">
-                {open ? (
-                    <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
-                ) : (
-                    <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
-                )}
-            </button>
-        </div>
-        <div className="w-full block flex-grow lg:flex lg:items-center hidden lg:w-auto">
-            <div className="text-sm lg:flex-grow">
-                <a href="#responsive-header" className="block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white mr-4">
-                    Dashboard
-                </a>
-                <a href="#responsive-header" className="block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white mr-4">
-                    Upload
-                </a>
-                <a href="#responsive-header" className="block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white">
-                    Settings
-                </a>
-            </div>
-            <div>
-                <a href="#" className="inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-teal-500 hover:bg-white mt-4 lg:mt-0">Download</a>
-            </div>
-        </div>
-    </nav>
-  )
+      </nav>
+    </>
+  );
 }

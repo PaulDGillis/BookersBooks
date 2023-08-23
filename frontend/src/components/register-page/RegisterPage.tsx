@@ -3,41 +3,39 @@ import { useEffect, useState } from "react";
 import * as userApi from "../../api/auth";
 import useAuth from "../../hooks/useAuth";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function RegisterPage() {
-    const { register } = useAuth();  
-    const [error, setError] = useState("");
-    const [inputs, setInputs] = useState({ username: "", password: "" });
+  const { register } = useAuth();
+  const [error, setError] = useState("");
+  const [inputs, setInputs] = useState({ username: "", password: "" });
 
-    useEffect(() => {
-      const checkUsername = setTimeout(() => {
-        const { username } = inputs;
+  useEffect(() => {
+    const checkUsername = setTimeout(() => {
+      const { username } = inputs;
 
-        userApi.checkUsername(username)
-          .then(() => setError(""))
-          .catch(error => setError(error.message));
-      }, 1000)
+      userApi
+        .checkUsername(username)
+        .then(() => setError(""))
+        .catch((error) => setError(error.message));
+    }, 1000);
 
-      return () => clearTimeout(checkUsername)
-    });
+    return () => clearTimeout(checkUsername);
+  });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handleChange = (event: { target: { name: any; value: any; }; }) => {
-        const name = event.target.name;
-        const value = event.target.value;
-        setInputs(values => ({...values, [name]: value}))
-    }
+  const handleChange = (event: { target: { name: string; value: string } }) => {
+    const name = event.target.name;
+    const value = event.target.value;
+    setInputs((values) => ({ ...values, [name]: value }));
+  };
 
-    const handleSubmit = (event: { preventDefault: () => void; }) => {
-        event.preventDefault();
+  const handleSubmit = (event: { preventDefault: () => void }) => {
+    event.preventDefault();
 
-        register(inputs)
-          .catch(error => setError(error.message));
-    }
+    register(inputs).catch((error) => setError(error.message));
+  };
 
-    return (
-        <>
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+  return (
+    <>
+      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <img
             className="mx-auto h-10 w-auto"
@@ -53,14 +51,20 @@ function RegisterPage() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <div className="flex items-center justify-between">
-                <label htmlFor="username" className="block text-sm font-medium leading-6 text-gray-900">
+                <label
+                  htmlFor="username"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
                   Username
                 </label>
-                {error !== '' &&
-                <div className="relative leading-normal text-red-700" role="alert">
-                  {error}
-                </div>
-                }
+                {error !== "" && (
+                  <div
+                    className="relative leading-normal text-red-700"
+                    role="alert"
+                  >
+                    {error}
+                  </div>
+                )}
               </div>
               <div className="mt-2">
                 <input
@@ -68,7 +72,7 @@ function RegisterPage() {
                   name="username"
                   type="text"
                   autoComplete="username"
-                  value={inputs.username || ""} 
+                  value={inputs.username || ""}
                   onChange={handleChange}
                   required
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -78,7 +82,10 @@ function RegisterPage() {
 
             <div>
               <div className="flex items-center justify-between">
-                <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
                   Password
                 </label>
               </div>
@@ -88,7 +95,7 @@ function RegisterPage() {
                   name="password"
                   type="password"
                   autoComplete="current-password"
-                  value={inputs.password || ""} 
+                  value={inputs.password || ""}
                   onChange={handleChange}
                   required
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -106,13 +113,19 @@ function RegisterPage() {
             </div>
           </form>
           <p className="mt-10 text-center text-sm text-gray-500">
-            Already a member? 
-            <Link to="/login" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"> SignIn</Link>
+            Already a member?
+            <Link
+              to="/login"
+              className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
+            >
+              {" "}
+              SignIn
+            </Link>
           </p>
         </div>
       </div>
     </>
-    )
+  );
 }
 
-export default RegisterPage
+export default RegisterPage;
