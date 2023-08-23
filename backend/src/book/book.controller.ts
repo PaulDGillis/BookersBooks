@@ -30,10 +30,7 @@ export class BookController {
           }
           cb(null, destPath);
         },
-        filename: (_req, file, cb) => {
-          const newFileName = Date.now() + file.originalname;
-          cb(null, newFileName);
-        },
+        filename: (_req, file, cb) => cb(null, file.originalname),
       }),
       fileFilter: (_req, file, callback) => {
         callback(null, extname(file.originalname) === '.epub');
