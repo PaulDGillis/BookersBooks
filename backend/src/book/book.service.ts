@@ -1,55 +1,76 @@
-import { Injectable } from '@nestjs/common';
-import { readFileSync as fsReadFileSync } from 'fs';
-// import {
-//   configure,
-//   ZipReader,
-//   BlobReader,
-//   TextWriter,
-//   BlobWriter,
-// } from '@zip.js/zip.js';
-// import { EPUB } from 'foliate-js/EPUB';
+import {
+  Injectable,
+  NotFoundException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { StorageFile } from 'src/storage/storage-file';
+import { StorageService } from 'src/storage/storage.service';
 
-// const makeZipLoader = async (file) => {
-//   configure({ useWebWorkers: false });
-//   const reader = new ZipReader(new BlobReader(file));
-//   const entries = await reader.getEntries();
-//   const map = new Map(entries.map((entry) => [entry.filename, entry]));
-//   const load =
-//     (f) =>
-//     (name, ...args) =>
-//       map.has(name) ? f(map.get(name), ...args) : null;
-//   const loadText = load((entry) => entry.getData(new TextWriter()));
-//   const loadBlob = load((entry, type) => entry.getData(new BlobWriter(type)));
-//   const getSize = (name) => map.get(name)?.uncompressedSize ?? 0;
-//   return { entries, loadText, loadBlob, getSize };
-// };
-
-// const isZip = async (file: Blob) => {
-//   const arr = new Uint8Array(await file.slice(0, 4).arrayBuffer());
-//   return (
-//     arr[0] === 0x50 && arr[1] === 0x4b && arr[2] === 0x03 && arr[3] === 0x04
-//   );
-// };
+import { EpubService } from './epub.service';
 
 @Injectable()
 export class BookService {
-  async saveBook(file: Express.Multer.File) {
-    // const buff = fsReadFileSync(file.path, null).buffer;
-    // const bob = new Blob([buff]);
-    // const yoZip = await isZip(bob);
-    // console.log(yoZip);
-    // const zipLoader = makeZipLoader(bob);
-    // const book = await new EPUB(zipLoader).init();
-    // console.log(book);
-    // const arrayBuff = toArrayBuffer(file.buffer);
-    // const book = ePub(arrayBuff);
-    // await Promise.all([book.loaded.metadata, book.coverUrl()]).then(
-    //   ([metadata, coverUrl]) => {
-    //     console.log(metadata);
-    //     console.log(coverUrl);
-    //   },
-    // );
-    // console.log(book);
-    console.log(file);
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly storageService: StorageService,
+    private readonly epubService: EpubService,
+  ) {}
+
+  async saveBook(username: string, file: Express.Multer.File) {
+    const fileBlob = new Blob([file.buffer]);
+    const {
+      title,
+      author,
+      img: { blob, name },
+    } = await this.epubService.parseEpub(fileBlob);
+
+    const book = await this.prismaService.book.create({
+      data: {
+        userId: username,
+        name: file.originalname,
+        img: name,
+        title,
+        author,
+      },
+    });
+
+    await this.storageService.save(
+      username + '/' + book.id + '/' + file.originalname,
+      file.mimetype,
+      file.buffer,
+      [{ bookId: book.id.toString() }],
+    );
+
+    await this.storageService.save(
+      username + '/' + book.id + '/' + name,
+      blob.type,
+      Buffer.from(await blob.arrayBuffer()),
+      [{ bookId: book.id.toString() }],
+    );
+  }
+
+  async listBooks(username: string) {
+    return this.storageService.list(username);
+  }
+
+  async findBook(username: string, bookId: string) {
+    const book = await this.prismaService.book.findUnique({
+      where: { id: parseInt(bookId) },
+    });
+
+    console.log(book);
+
+    let storageFile: StorageFile;
+    try {
+      storageFile = await this.storageService.get(username + '/' + book.name);
+    } catch (e) {
+      if (e.message.toString().includes('No such object')) {
+        throw new NotFoundException('book not found');
+      } else {
+        throw new ServiceUnavailableException('internal error');
+      }
+    }
+    return storageFile;
   }
 }

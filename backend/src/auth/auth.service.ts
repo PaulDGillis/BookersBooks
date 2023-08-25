@@ -1,50 +1,65 @@
 import { Injectable } from '@nestjs/common';
-import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
   private saltRounds = 10;
 
   constructor(
-    private userService: UsersService,
-    private jwtService: JwtService,
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
   ) {}
 
-  async validateUser(username: string, pass: string): Promise<any> {
-    const user = await this.userService.find(username);
-    if (user == null) {
-      return null;
-    }
-    const match = bcrypt.compareSync(pass, user.password);
-    if (match) {
+  async findUser(
+    username: string,
+  ): Promise<{ id: number; username: string; password: string } | null> {
+    return this.prisma.user.findUnique({
+      where: { username },
+    });
+  }
+
+  async checkValidUser(
+    username: string,
+    pass: string,
+  ): Promise<{ id: number; username: string } | null> {
+    const userRecord = await this.findUser(username);
+    if (userRecord != null && bcrypt.compareSync(pass, userRecord.password)) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password, ...result } = user;
-      return result;
+      const { password, ...user } = userRecord;
+      return user;
     }
     return null;
   }
 
-  async signup(username: string, password: string): Promise<any> {
-    const hash = bcrypt.hashSync(password, this.saltRounds);
-    const payload = { username: username, password: hash };
-    return this.userService.createUser(payload).then(function (result) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password, ...res } = result;
-      return res;
+  async register(
+    username: string,
+    password: string,
+  ): Promise<{ id: number; username: string }> {
+    return this.prisma.user
+      .create({
+        data: {
+          username: username,
+          password: bcrypt.hashSync(password, this.saltRounds),
+        },
+      })
+      .then(function (result) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { password, ...res } = result;
+        return res;
+      });
+  }
+
+  login(user: any): string {
+    return this.jwtService.sign({
+      username: user.username,
+      sub: user.userId,
     });
   }
 
-  async login(user: any): Promise<{ access_token: string }> {
-    const payload = { username: user.username, sub: user.userId };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
-  }
-
-  async deleteUser(user: any) {
-    const payload = { username: user.username, sub: user.userId };
-    return this.userService.deleteUser(payload.username);
+  async deleteUser(username: string): Promise<void> {
+    const user = await this.findUser(username);
+    await this.prisma.user.delete({ where: user });
   }
 }
