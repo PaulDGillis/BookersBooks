@@ -51,12 +51,7 @@ export class AuthService {
       });
   }
 
-  login(user: any): string {
-    return this.jwtService.sign({
-      username: user.username,
-      sub: user.userId,
-    });
-  }
+  login = (username: string) => this.jwtService.sign({ username });
 
   async deleteUser(username: string): Promise<void> {
     const user = await this.findUser(username);

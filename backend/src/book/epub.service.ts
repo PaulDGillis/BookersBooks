@@ -34,6 +34,7 @@ export class EpubService {
     const parser = new XMLParser({
       ignoreAttributes: false,
       attributeNamePrefix: '',
+      alwaysCreateTextNode: true,
     });
     const parsedContainer = parser.parse(containerXmlStr);
     const rootFile = parsedContainer.container.rootfiles.rootfile;
@@ -67,7 +68,8 @@ export class EpubService {
       opfParentSplit.slice(0, opfParentSplit.length - 1).join('/') + '/';
 
     // Combine to get full cover file path in zip
-    const imagePath = opfParentPath + imagePathItem.href;
+    const imagePath = opfParentPath + imagePathItem.href.replace(/%20/g, ' ');
+    // console.log(opfParentPath, imagePathItem, imagePath);
 
     // Pull img out of .epub
     const img = await map
@@ -76,7 +78,7 @@ export class EpubService {
 
     // Remaining metadata
     const metadata = parsedOpf.metadata;
-    const title: string = metadata['dc:title'];
+    const title: string = metadata['dc:title']['#text'];
     const author: string = metadata['dc:creator']['#text'];
     reader.close();
 

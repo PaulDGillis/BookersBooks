@@ -8,6 +8,7 @@ import { StorageFile } from 'src/storage/storage-file';
 import { StorageService } from 'src/storage/storage.service';
 
 import { EpubService } from './epub.service';
+import { Book } from '@prisma/client';
 
 @Injectable()
 export class BookService {
@@ -51,26 +52,61 @@ export class BookService {
   }
 
   async listBooks(username: string) {
-    return this.storageService.list(username);
+    const books = (
+      await this.prismaService.book.findMany({
+        where: { userId: username },
+        orderBy: { title: 'asc' },
+      })
+    ).map((book) => {
+      return { id: book.id, title: book.title, author: book.author };
+    });
+    return books;
   }
 
   async findBook(username: string, bookId: string) {
-    const book = await this.prismaService.book.findUnique({
+    return this.prismaService.book.findUnique({
       where: { id: parseInt(bookId) },
     });
+  }
 
-    console.log(book);
-
+  downloadBook = async (username: string, bookId: string) => {
+    const book = await this.findBook(username, bookId);
     let storageFile: StorageFile;
     try {
-      storageFile = await this.storageService.get(username + '/' + book.name);
+      storageFile = await this.storageService.get(
+        username + '/' + book.id + '/' + book.name,
+      );
     } catch (e) {
       if (e.message.toString().includes('No such object')) {
+        console.log(e);
         throw new NotFoundException('book not found');
       } else {
         throw new ServiceUnavailableException('internal error');
       }
     }
     return storageFile;
-  }
+  };
+
+  downloadCover = async (username: string, bookId: string) => {
+    const book = await this.findBook(username, bookId);
+    let storageFile: StorageFile;
+    try {
+      storageFile = await this.storageService.get(
+        username + '/' + book.id + '/' + book.img,
+      );
+    } catch (e) {
+      if (e.message.toString().includes('No such object')) {
+        console.log(e);
+        throw new NotFoundException('cover not found');
+      } else {
+        throw new ServiceUnavailableException('internal error');
+      }
+    }
+    return storageFile;
+  };
+
+  downloadMetadata = async (username: string, bookId: string) => {
+    const book = await this.findBook(username, bookId);
+    return { title: book.title, author: book.author };
+  };
 }

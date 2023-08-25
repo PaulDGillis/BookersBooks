@@ -38,7 +38,7 @@ export class AuthController {
     return this.authService
       .register(userData.username, userData.password)
       .then((user) => {
-        const access_token = this.authService.login(user);
+        const access_token = this.authService.login(user.username);
         res
           .cookie('access_token', access_token, {
             httpOnly: true,
@@ -83,8 +83,8 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('status')
-  getProfile() {
-    return { status: 'ok' };
+  getProfile(@Username() username: string) {
+    return { status: 'ok', username };
   }
 
   @UseGuards(JwtAuthGuard)

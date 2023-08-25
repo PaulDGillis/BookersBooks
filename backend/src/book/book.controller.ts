@@ -45,23 +45,43 @@ export class BookController {
   @UseGuards(JwtAuthGuard)
   @Get('list')
   async listBooks(@Username() username) {
-    const test = await this.bookService.listBooks(username);
-    console.log(test);
+    return await this.bookService.listBooks(username);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get(':bookId')
+  @Get(':bookId/book')
   async downloadBook(
     @Param('bookId') bookId: string,
     @Username() username: string,
     @Res() res: Response,
   ) {
-    const storageFile = await this.bookService.findBook(username, bookId);
-
-    console.log(storageFile);
+    const storageFile = await this.bookService.downloadBook(username, bookId);
 
     res.setHeader('Content-Type', storageFile.contentType);
     res.setHeader('Cache-Control', 'max-age=60d');
     res.end(storageFile.buffer);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':bookId/cover')
+  async downloadCover(
+    @Param('bookId') bookId: string,
+    @Username() username: string,
+    @Res() res: Response,
+  ) {
+    const storageFile = await this.bookService.downloadCover(username, bookId);
+
+    res.setHeader('Content-Type', storageFile.contentType);
+    res.setHeader('Cache-Control', 'max-age=60d');
+    res.end(storageFile.buffer);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':bookId/metadata')
+  async downloadMetadata(
+    @Param('bookId') bookId: string,
+    @Username() username: string,
+  ) {
+    return this.bookService.downloadMetadata(username, bookId);
   }
 }
