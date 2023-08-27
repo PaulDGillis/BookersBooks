@@ -63,6 +63,8 @@ export const AuthProvider = () => {
   );
 };
 
-export default function useAuth() {
+const useAuth = () => {
   return useContext(AuthContext);
-}
+};
+
+export default useAuth;

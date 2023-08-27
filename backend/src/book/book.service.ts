@@ -9,6 +9,7 @@ import { StorageService } from 'src/storage/storage.service';
 
 import { EpubService } from './epub.service';
 import { Book } from '@prisma/client';
+import { join } from 'path';
 
 @Injectable()
 export class BookService {
@@ -18,7 +19,7 @@ export class BookService {
     private readonly epubService: EpubService,
   ) {}
 
-  async saveBook(username: string, file: Express.Multer.File) {
+  saveBook = async (username: string, file: Express.Multer.File) => {
     const fileBlob = new Blob([file.buffer]);
     const {
       title,
@@ -49,9 +50,20 @@ export class BookService {
       Buffer.from(await blob.arrayBuffer()),
       [{ bookId: book.id.toString() }],
     );
-  }
 
-  async listBooks(username: string) {
+    return { id: book.id, title: book.title, author: book.author };
+  };
+
+  deleteBook = async (username: string, bookId: string) => {
+    const book = await this.prismaService.book.delete({
+      where: { userId: username, id: parseInt(bookId) },
+    });
+
+    await this.storageService.delete(join(username, bookId, book.img));
+    await this.storageService.delete(join(username, bookId, book.name));
+  };
+
+  listBooks = async (username: string) => {
     const books = (
       await this.prismaService.book.findMany({
         where: { userId: username },
@@ -61,13 +73,13 @@ export class BookService {
       return { id: book.id, title: book.title, author: book.author };
     });
     return books;
-  }
+  };
 
-  async findBook(username: string, bookId: string) {
+  findBook = async (username: string, bookId: string) => {
     return this.prismaService.book.findUnique({
       where: { id: parseInt(bookId) },
     });
-  }
+  };
 
   downloadBook = async (username: string, bookId: string) => {
     const book = await this.findBook(username, bookId);

@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   HttpStatus,
   Param,
@@ -39,13 +40,22 @@ export class BookController {
     )
     file: Express.Multer.File,
   ) {
-    await this.bookService.saveBook(username, file);
+    return await this.bookService.saveBook(username, file);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('list')
   async listBooks(@Username() username) {
     return await this.bookService.listBooks(username);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':bookId')
+  async deleteBook(
+    @Param('bookId') bookId: string,
+    @Username() username: string,
+  ) {
+    await this.bookService.deleteBook(username, bookId);
   }
 
   @UseGuards(JwtAuthGuard)

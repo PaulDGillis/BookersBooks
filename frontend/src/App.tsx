@@ -7,7 +7,7 @@ import BookPage from "./components/main-page/sub-pages/BookPage.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import LibraryPage from "./components/main-page/sub-pages/LibraryPage.tsx";
 
-export default function App() {
+const App = () => {
   const router = createBrowserRouter([
     {
       element: <AuthProvider />,
@@ -43,4 +43,6 @@ export default function App() {
   ]);
 
   return <RouterProvider router={router} />;
-}
+};
+
+export default App;
