@@ -17,6 +17,7 @@ import { BookService } from './book.service';
 import { extname } from 'path';
 import { Response } from 'express';
 import { Username } from 'src/auth/user.decorator';
+import { BookMetaData, ListBookData } from 'src/types';
 
 @Controller('book')
 export class BookController {
@@ -39,13 +40,13 @@ export class BookController {
         .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
     )
     file: Express.Multer.File,
-  ) {
+  ): Promise<BookMetaData> {
     return await this.bookService.saveBook(username, file);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('list')
-  async listBooks(@Username() username) {
+  async listBooks(@Username() username): Promise<ListBookData> {
     return await this.bookService.listBooks(username);
   }
 
@@ -54,7 +55,7 @@ export class BookController {
   async deleteBook(
     @Param('bookId') bookId: string,
     @Username() username: string,
-  ) {
+  ): Promise<void> {
     await this.bookService.deleteBook(username, bookId);
   }
 
@@ -64,7 +65,7 @@ export class BookController {
     @Param('bookId') bookId: string,
     @Username() username: string,
     @Res() res: Response,
-  ) {
+  ): Promise<void> {
     const storageFile = await this.bookService.downloadBook(username, bookId);
 
     res.setHeader('Content-Type', storageFile.contentType);
@@ -78,7 +79,7 @@ export class BookController {
     @Param('bookId') bookId: string,
     @Username() username: string,
     @Res() res: Response,
-  ) {
+  ): Promise<void> {
     const storageFile = await this.bookService.downloadCover(username, bookId);
 
     res.setHeader('Content-Type', storageFile.contentType);
@@ -91,7 +92,7 @@ export class BookController {
   async downloadMetadata(
     @Param('bookId') bookId: string,
     @Username() username: string,
-  ) {
+  ): Promise<BookMetaData> {
     return this.bookService.downloadMetadata(username, bookId);
   }
 }

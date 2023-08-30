@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { UserData } from 'src/types';
 
 @Injectable()
 export class AuthService {
@@ -12,9 +14,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async findUser(
-    username: string,
-  ): Promise<{ id: number; username: string; password: string } | null> {
+  async findUser(username: string): Promise<User | null> {
     return this.prisma.user.findUnique({
       where: { username },
     });
@@ -23,7 +23,7 @@ export class AuthService {
   async checkValidUser(
     username: string,
     pass: string,
-  ): Promise<{ id: number; username: string } | null> {
+  ): Promise<UserData | null> {
     const userRecord = await this.findUser(username);
     if (userRecord != null && bcrypt.compareSync(pass, userRecord.password)) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -33,10 +33,7 @@ export class AuthService {
     return null;
   }
 
-  async register(
-    username: string,
-    password: string,
-  ): Promise<{ id: number; username: string }> {
+  async register(username: string, password: string): Promise<UserData> {
     return this.prisma.user
       .create({
         data: {
@@ -51,7 +48,7 @@ export class AuthService {
       });
   }
 
-  login = (username: string) => this.jwtService.sign({ username });
+  login = (username: string): string => this.jwtService.sign({ username });
 
   async deleteUser(username: string): Promise<void> {
     const user = await this.findUser(username);

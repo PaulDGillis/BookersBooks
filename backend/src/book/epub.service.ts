@@ -9,10 +9,11 @@ import {
 } from '@zip.js/zip.js';
 
 import { XMLParser } from 'fast-xml-parser';
+import { EpubMetaData } from 'src/types';
 
 @Injectable()
 export class EpubService {
-  parseEpub = async (file: Blob) => {
+  parseEpub = async (file: Blob): Promise<EpubMetaData> => {
     // Configure js.zip top open
     configure({ useWebWorkers: false });
     const reader = new ZipReader(new BlobReader(file));
@@ -51,10 +52,10 @@ export class EpubService {
     if (coverImgsArr.length <= 0) throw Error('Malformed data');
 
     // Take cover photo file name and look up full path in manifest.
-    const cover = coverImgsArr[0].content;
+    const img = coverImgsArr[0].content;
     const imagePathArr = parsedOpf.manifest.item.filter(
       (item: { id: string }) => {
-        return item.id === cover;
+        return item.id === img;
       },
     );
 
@@ -72,7 +73,7 @@ export class EpubService {
     // console.log(opfParentPath, imagePathItem, imagePath);
 
     // Pull img out of .epub
-    const img = await map
+    const blob = await map
       .get(imagePath)
       .getData(new BlobWriter(imagePathItem['media-type']));
 
@@ -82,6 +83,6 @@ export class EpubService {
     const author: string = metadata['dc:creator']['#text'];
     reader.close();
 
-    return { title, author, img: { blob: img, name: cover } };
+    return { title, author, img, blob };
   };
 }

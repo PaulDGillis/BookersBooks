@@ -8,8 +8,8 @@ import { StorageFile } from 'src/storage/storage-file';
 import { StorageService } from 'src/storage/storage.service';
 
 import { EpubService } from './epub.service';
-import { Book } from '@prisma/client';
 import { join } from 'path';
+import { BookMetaData, FindBookResponse, ListBookData } from 'src/types';
 
 @Injectable()
 export class BookService {
@@ -19,23 +19,30 @@ export class BookService {
     private readonly epubService: EpubService,
   ) {}
 
-  saveBook = async (username: string, file: Express.Multer.File) => {
+  saveBook = async (
+    username: string,
+    file: Express.Multer.File,
+  ): Promise<BookMetaData> => {
     const fileBlob = new Blob([file.buffer]);
     const {
       title,
       author,
-      img: { blob, name },
+      img: imgName,
+      blob,
     } = await this.epubService.parseEpub(fileBlob);
 
-    const book = await this.prismaService.book.create({
-      data: {
-        userId: username,
-        name: file.originalname,
-        img: name,
-        title,
-        author,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { img, name, userId, ...book } = await this.prismaService.book.create(
+      {
+        data: {
+          userId: username,
+          name: file.originalname,
+          img: imgName,
+          title,
+          author,
+        },
       },
-    });
+    );
 
     await this.storageService.save(
       username + '/' + book.id + '/' + file.originalname,
@@ -51,10 +58,10 @@ export class BookService {
       [{ bookId: book.id.toString() }],
     );
 
-    return { id: book.id, title: book.title, author: book.author };
+    return book;
   };
 
-  deleteBook = async (username: string, bookId: string) => {
+  deleteBook = async (username: string, bookId: string): Promise<void> => {
     const book = await this.prismaService.book.delete({
       where: { userId: username, id: parseInt(bookId) },
     });
@@ -63,7 +70,7 @@ export class BookService {
     await this.storageService.delete(join(username, bookId, book.name));
   };
 
-  listBooks = async (username: string) => {
+  listBooks = async (username: string): Promise<ListBookData> => {
     const books = (
       await this.prismaService.book.findMany({
         where: { userId: username },
@@ -75,13 +82,22 @@ export class BookService {
     return books;
   };
 
-  findBook = async (username: string, bookId: string) => {
+  findBook = async (
+    username: string,
+    bookId: string,
+  ): Promise<FindBookResponse> => {
     return this.prismaService.book.findUnique({
-      where: { id: parseInt(bookId) },
+      where: {
+        id: parseInt(bookId),
+        userId: username,
+      },
     });
   };
 
-  downloadBook = async (username: string, bookId: string) => {
+  downloadBook = async (
+    username: string,
+    bookId: string,
+  ): Promise<StorageFile> => {
     const book = await this.findBook(username, bookId);
     let storageFile: StorageFile;
     try {
@@ -99,7 +115,10 @@ export class BookService {
     return storageFile;
   };
 
-  downloadCover = async (username: string, bookId: string) => {
+  downloadCover = async (
+    username: string,
+    bookId: string,
+  ): Promise<StorageFile> => {
     const book = await this.findBook(username, bookId);
     let storageFile: StorageFile;
     try {
@@ -117,8 +136,15 @@ export class BookService {
     return storageFile;
   };
 
-  downloadMetadata = async (username: string, bookId: string) => {
-    const book = await this.findBook(username, bookId);
-    return { title: book.title, author: book.author };
+  downloadMetadata = async (
+    username: string,
+    bookId: string,
+  ): Promise<BookMetaData> => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { img, name, userId, ...book } = await this.findBook(
+      username,
+      bookId,
+    );
+    return book;
   };
 }

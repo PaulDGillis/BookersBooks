@@ -22,12 +22,9 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Get('check/:username')
-  async checkUsername(
-    @Param('username') username: string,
-  ): Promise<{ valid: boolean }> {
-    return this.authService.findUser(username).then((user: any | null) => {
-      return { valid: user === null };
-    });
+  async checkUsername(@Param('username') username: string): Promise<void> {
+    const user = await this.authService.findUser(username);
+    if (user !== null) throw Error('Username taken');
   }
 
   @Post('register')
@@ -46,7 +43,7 @@ export class AuthController {
             sameSite: 'lax',
             expires: new Date(Date.now() + 1 * 24 * 60 * 10000),
           })
-          .send({ status: 'ok' });
+          .send();
       })
       .catch((error: PrismaClientKnownRequestError) => {
         if (error.code === 'P2002') {
@@ -63,7 +60,7 @@ export class AuthController {
   async userLogin(
     @Username() username: string,
     @Res({ passthrough: true }) res: Response,
-  ) {
+  ): Promise<void> {
     const access_token = this.authService.login(username);
     res
       .cookie('access_token', access_token, {
@@ -72,20 +69,18 @@ export class AuthController {
         sameSite: 'lax',
         expires: new Date(Date.now() + 1 * 24 * 60 * 10000),
       })
-      .send({ status: 'ok' });
+      .send();
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  async logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('access_token').send({ status: 'ok' });
+  async logout(@Res({ passthrough: true }) res: Response): Promise<void> {
+    res.clearCookie('access_token').send();
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('status')
-  getProfile(@Username() username: string) {
-    return { status: 'ok', username };
-  }
+  getProfile() {}
 
   @UseGuards(JwtAuthGuard)
   @Delete()
@@ -94,6 +89,6 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     await this.authService.deleteUser(username);
-    res.clearCookie('access_token').send({ status: 'ok' });
+    res.clearCookie('access_token').send();
   }
 }
