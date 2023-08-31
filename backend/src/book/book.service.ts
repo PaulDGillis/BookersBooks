@@ -45,14 +45,14 @@ export class BookService {
     );
 
     await this.storageService.save(
-      username + '/' + book.id + '/' + file.originalname,
+      `${username}/${book.id}/${file.originalname}`,
       file.mimetype,
       file.buffer,
       [{ bookId: book.id.toString() }],
     );
 
     await this.storageService.save(
-      username + '/' + book.id + '/' + name,
+      `${username}/${book.id}/${img}`,
       blob.type,
       Buffer.from(await blob.arrayBuffer()),
       [{ bookId: book.id.toString() }],
@@ -123,7 +123,7 @@ export class BookService {
     let storageFile: StorageFile;
     try {
       storageFile = await this.storageService.get(
-        username + '/' + book.id + '/' + book.img,
+        `${username}/${book.id}/${book.img}`,
       );
     } catch (e) {
       if (e.message.toString().includes('No such object')) {

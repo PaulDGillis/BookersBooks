@@ -2,7 +2,6 @@ import { AuthProvider } from "./hooks/useAuth.tsx";
 import MainPage from "./components/main-page/MainPage.tsx";
 import RegisterPage from "./components/register-page/RegisterPage.tsx";
 import LogInPage from "./components/login-page/LogInPage.tsx";
-import UploadPage from "./components/main-page/sub-pages/UploadPage.tsx";
 import BookPage from "./components/main-page/sub-pages/BookPage.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import LibraryPage from "./components/main-page/sub-pages/LibraryPage.tsx";
@@ -19,10 +18,6 @@ const App = () => {
             {
               path: "library",
               element: <LibraryPage />,
-            },
-            {
-              path: "upload",
-              element: <UploadPage />,
             },
             {
               path: "book",
