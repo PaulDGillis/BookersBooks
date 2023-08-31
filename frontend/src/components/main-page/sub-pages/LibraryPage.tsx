@@ -18,7 +18,7 @@ const LibraryPage = () => {
   }, []);
   return (
     <>
-      <div className="mt-4 mx-4 grid md:grid-cols-4 sm:grid-cols-2 gap-4">
+      <div className="mt-4 mx-4 grid grid-flow-col auto-cols-auto gap-4 items-center justify-start">
         {books.map((book) => {
           return <BookCard key={book.id} book={book} />;
         })}

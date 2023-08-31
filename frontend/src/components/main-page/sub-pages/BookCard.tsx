@@ -1,22 +1,19 @@
-import { useEffect, useState } from "react";
 import { BookItem } from "./LibraryPage";
 import * as bookApi from "../../../api/book";
 
 const BookCard = (props: { book: BookItem }) => {
-  const [coverImgUrl, setCoverImgUrl] = useState<string | undefined>();
-
-  useEffect(() => {
-    bookApi
-      .cover(props.book.id)
-      .then((cover) => URL.createObjectURL(cover))
-      .then((coverUrl) => setCoverImgUrl(coverUrl));
-  }, [props]);
+  const coverImgUrl = bookApi.cover(props.book.id);
   return (
-    <div className="aspect-[4/3] rounded-md">
-      <div className="bg-black">{coverImgUrl && <img src={coverImgUrl} />}</div>
-      <div className="bg-red rounded-b-md">
-        <h4>{props.book.title}</h4>
-        <p>{props.book.author}</p>
+    <div className="rounded-xl grow shadow-lg bg-neutral-200 flex flex-row items-center">
+      <img
+        className="rounded-l-lg w-16 md:w-32 lg:w-48 h-auto"
+        src={coverImgUrl}
+      />
+      <div className="m-2 min-w-4 flex flex-col items-start">
+        <div className="text-md font-medium text-black line-clamp-1 text-ellipsis overflow-hidden">
+          {props.book.title}
+        </div>
+        <div className="text-slate-500">{props.book.author}</div>
       </div>
     </div>
   );

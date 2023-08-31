@@ -21,7 +21,7 @@ const upload = async (file: File): Promise<any> => {
 
 const list = async (): Promise<Response> => api.get("/book/list");
 
-const cover = async (bookId: string): Promise<Blob> =>
-  api.get(`/book/${bookId}/cover`).then((response) => response.blob());
+const cover = (bookId: string): string =>
+  `${api.BASE_URL}/book/${bookId}/cover`;
 
 export { upload, list, cover };
