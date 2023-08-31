@@ -24,7 +24,8 @@ export class AuthController {
   @Get('check/:username')
   async checkUsername(@Param('username') username: string): Promise<void> {
     const user = await this.authService.findUser(username);
-    if (user !== null) throw Error('Username taken');
+    if (user !== null)
+      throw new HttpException('Username taken', HttpStatus.FORBIDDEN);
   }
 
   @Post('register')

@@ -1,9 +1,11 @@
-import { BASE_URL } from "./consts";
+import * as api from "./api";
 
-const upload = async (file: File) => {
+// TODO fix this to use backend types
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const upload = async (file: File): Promise<any> => {
   const formData = new FormData();
   formData.append("file", file);
-  return fetch(BASE_URL + "/book/upload", {
+  return fetch(`${api.BASE_URL}/book/upload`, {
     method: "POST",
     credentials: "include",
     headers: {},
@@ -17,24 +19,9 @@ const upload = async (file: File) => {
   });
 };
 
-const list = async () => {
-  return fetch(BASE_URL + "/book/list", {
-    method: "GET",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-};
+const list = async (): Promise<Response> => api.get("/book/list");
 
-const cover = (bookId: string) => {
-  return fetch(BASE_URL + "/book/" + bookId + "/cover", {
-    method: "GET",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  }).then((response) => response.blob());
-};
+const cover = async (bookId: string): Promise<Blob> =>
+  api.get(`/book/${bookId}/cover`).then((response) => response.blob());
 
 export { upload, list, cover };

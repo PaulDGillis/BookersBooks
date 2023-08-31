@@ -17,7 +17,7 @@ import { BookService } from './book.service';
 import { extname } from 'path';
 import { Response } from 'express';
 import { Username } from 'src/auth/user.decorator';
-import { BookMetaData, ListBookData } from 'src/types';
+import { BookMetaData, ListBookData } from 'bookers-books';
 
 @Controller('book')
 export class BookController {

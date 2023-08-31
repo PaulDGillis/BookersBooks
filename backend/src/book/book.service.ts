@@ -9,7 +9,7 @@ import { StorageService } from 'src/storage/storage.service';
 
 import { EpubService } from './epub.service';
 import { join } from 'path';
-import { BookMetaData, FindBookResponse, ListBookData } from 'src/types';
+import { BookMetaData, FindBookResponse, ListBookData } from 'bookers-books';
 
 @Injectable()
 export class BookService {

@@ -9,7 +9,7 @@ import {
 } from '@zip.js/zip.js';
 
 import { XMLParser } from 'fast-xml-parser';
-import { EpubMetaData } from 'src/types';
+import { EpubMetaData } from 'bookers-books';
 
 @Injectable()
 export class EpubService {

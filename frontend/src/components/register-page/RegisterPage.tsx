@@ -12,14 +12,16 @@ function RegisterPage() {
     const checkUsername = setTimeout(() => {
       const { username } = inputs;
 
-      userApi
-        .checkUsername(username)
-        .then(() => setError(""))
-        .catch((error) => setError(error.message));
+      if (username !== "") {
+        userApi
+          .checkUsername(username)
+          .then(() => setError(""))
+          .catch((error) => setError(error.message));
+      }
     }, 1000);
 
     return () => clearTimeout(checkUsername);
-  });
+  }, [inputs]);
 
   const handleChange = (event: { target: { name: string; value: string } }) => {
     const name = event.target.name;
